@@ -18,14 +18,14 @@ import Data.Pool (Pool, withResource)
 import Data.Text.Lazy (Text)
 import Database.MySQL.Simple (Connection, query_)
 import GHC.Generics (Generic)
-import Network.HTTP.Types (notFound404)
+import Network.HTTP.Types (ok200, notFound404, StdMethod(HEAD))
 import Network.Wai (Application, Middleware)
 import Network.Wai.Middleware.RequestLogger (Destination(Handle),
   mkRequestLogger, RequestLoggerSettings(destination, outputFormat),
   OutputFormat(CustomOutputFormat))
 import Network.Wai.Middleware.Static (addBase, hasPrefix, staticPolicy, (>->))
 import System.IO (stderr)
-import Web.Scotty (ScottyM, ActionM, middleware, json, file, get,
+import Web.Scotty (ScottyM, ActionM, middleware, json, file, addroute, get,
   status, text, param, scottyApp)
 import qualified Data.HashMap.Lazy as HM
 
@@ -51,7 +51,10 @@ myProcess ps logger dataDir = do
   get "/index.html" $ file index_html
 
   get "/serverlist.json" $ json (sort $ HM.keys ps)
-  get "/server/:server/processlist.json" $ apiGetProcesses ps
+  get "/server/:server/processlist.json" $ apiGetProcessList ps
+
+  -- Used by client to see which servers are really allowed by Sproxy
+  addroute HEAD "/server/:server/processlist.json" $ apiCanProcessList ps
 
 data Process = Process {
     id      :: Int
@@ -65,12 +68,19 @@ data Process = Process {
 } deriving (Generic)
 instance ToJSON Process
 
-apiGetProcesses :: Pools -> ActionM ()
-apiGetProcesses ps = do
+apiCanProcessList :: Pools -> ActionM ()
+apiCanProcessList ps = do
   server <- param "server"
   case HM.lookup server ps of
     Nothing -> status notFound404 >> text server
-    Just p -> do
+    Just _  -> status ok200
+
+apiGetProcessList :: Pools -> ActionM ()
+apiGetProcessList ps = do
+  server <- param "server"
+  case HM.lookup server ps of
+    Nothing -> status notFound404 >> text server
+    Just p  -> do
       res <- withDB p $ \c ->
               query_ c "SELECT \
               \id, user, host, db, command, time, state, info \

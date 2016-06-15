@@ -56,20 +56,36 @@ $(function() {
     method: "GET",
     error: commonError,
     success: function(servers) {
+      var total = servers.length;
+      var available = [];
+      var checked = 0;
       $.each(servers, function(i, s) {
-        $('#serverList>ul')
-          .append('<li><a href="#">' + s +
-            '</a></li>')
+        $.ajax({
+          url: "server/" + s + "/processlist.json",
+          method: "HEAD",
+          success: function() {
+            available.push(s);
+          },
+          complete: function() {
+            var menu = $('#serverList>ul');
+            checked++;
+            if (checked === total) {
+              $.each(available.sort(), function(i, s) {
+                menu.append('<li><a href="#">' + s + '</a></li>')
+              });
+              $("#serverList a").on("click", function() {
+                var server = $(this).text();
+                $(this).parent().parent().find('.active').removeClass('active');
+                $(this).parent().addClass('active');
+                clearInterval(interval);
+                getProcessList(server);
+                interval = setInterval(getProcessList, 60 * 1000, server);
+              });
+              info.hide();
+            }
+          }
+        });
       });
-      $("#serverList a").on("click", function() {
-        var server = $(this).text();
-        $(this).parent().parent().find('.active').removeClass('active');
-        $(this).parent().addClass('active');
-        clearInterval(interval);
-        getProcessList(server);
-        interval = setInterval(getProcessList, 60 * 1000, server);
-      });
-      info.hide();
     }
   });
 });
