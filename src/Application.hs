@@ -63,7 +63,7 @@ data Process = Process {
   , db      :: Maybe Text
   , command :: Text
   , time    :: Int
-  , state   :: Text
+  , state   :: Maybe Text
   , info    :: Text
 } deriving (Generic)
 instance ToJSON Process
