@@ -5,7 +5,6 @@ module Server
 
 import Control.Exception.Base (throwIO, catch, bracket)
 import Data.Bits ((.|.))
-import Data.ByteString.Lazy (fromStrict)
 import Data.List (find)
 import Data.Maybe (fromJust)
 import Data.Pool (createPool, destroyAllResources)
@@ -22,6 +21,7 @@ import System.IO (hPutStrLn, stderr)
 import System.IO.Error (isDoesNotExistError)
 import System.Posix.Files (removeLink, setFileMode, socketMode, ownerReadMode,
   ownerWriteMode, groupReadMode, groupWriteMode)
+import qualified Data.ByteString.Lazy as LBS
 import qualified Data.HashMap.Lazy as HM
 import qualified Database.MySQL.Simple as MySQL
 
@@ -52,7 +52,8 @@ getGroup ci = decodeUtf8 . getName . fromJust . find isGroup . connectOptions $ 
   where
     isGroup (ReadDefaultGroup _) = True
     isGroup _ = False
-    getName (ReadDefaultGroup n) = fromStrict n
+    -- FIXME: Removing trailing zero added for buggy mysql in Main.hs.
+    getName (ReadDefaultGroup n) = LBS.takeWhile (0 /=) . LBS.fromStrict $ n
     getName _ = error "Cannot happen"
 
 

@@ -61,7 +61,8 @@ main = do
         connectPort     = 0,
         connectSSL      = Nothing,
         connectUser     = "",
-        connectOptions  = [ ReadDefaultFile file, ReadDefaultGroup (pack g) ]
+        -- FIXME: Work aroung buggy mysql: unsafeUseAsCString creates garbage.
+        connectOptions  = [ ReadDefaultFile file, ReadDefaultGroup (pack $ g ++ "\0") ]
       }) servers
       listen = maybe (Right socket) (Left . read) port
     server listen myInfo datadir
