@@ -1,5 +1,5 @@
 name: mywatch
-version: 0.1.0
+version: 0.1.1
 synopsis: View MySQL processes
 description:
   View queries on multiple MySQL servers. Designed to work behind Sproxy.
@@ -26,7 +26,7 @@ source-repository head
 
 executable mywatch
     default-language: Haskell2010
-    ghc-options: -Wall -static
+    ghc-options: -Wall -static -threaded
     hs-source-dirs: src
     main-is: Main.hs
     other-modules:
