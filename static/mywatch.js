@@ -75,6 +75,7 @@ $(function() {
               });
               $("#serverList a").on("click", function() {
                 var server = $(this).text();
+                document.title = server + ' — ' + 'MyWatch';
                 $(this).parent().parent().find('.active').removeClass('active');
                 $(this).parent().addClass('active');
                 clearInterval(interval);
