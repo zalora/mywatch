@@ -7,8 +7,9 @@ module Main (
 import Data.ByteString.Char8 (pack)
 import Data.Either.Utils (forceEither)
 import Data.Maybe (fromJust)
+import Data.List (isPrefixOf)
 import Data.Version (showVersion)
-import Database.MySQL.Base (ConnectInfo(..))
+import Database.MySQL.Base (ConnectInfo(..), defaultSSLInfo)
 import Database.MySQL.Base.Types (Option(ReadDefaultFile, ReadDefaultGroup))
 import Paths_mywatch (getDataDir, version) -- from cabal
 import System.Environment (getArgs)
@@ -51,15 +52,19 @@ main = do
       port = O.getArg args $ O.longOption "port"
       socket = fromJust $ O.getArg args $ O.longOption "socket"
       datadir = fromJust $ O.getArg args $ O.longOption "datadir"
-    servers <- filter ("client" /=) . Cf.sections . forceEither <$> Cf.readfile Cf.emptyCP file
+
+    cf <- forceEither <$> Cf.readfile Cf.emptyCP file
     let
+      servers = filter ("client" /=) . Cf.sections $ cf
       myInfo = map (\g -> ConnectInfo {
         connectDatabase = "",
         connectHost     = "",
         connectPassword = "",
         connectPath     = "",
         connectPort     = 0,
-        connectSSL      = Nothing,
+        -- FIXME: https://jira.mariadb.org/browse/MDEV-10246
+        connectSSL      = if any (isPrefixOf "ssl") (forceEither $ Cf.options cf g)
+                          then Just defaultSSLInfo else Nothing,
         connectUser     = "",
         -- FIXME: Work aroung buggy mysql: unsafeUseAsCString creates garbage.
         connectOptions  = [ ReadDefaultFile file, ReadDefaultGroup (pack $ g ++ "\0") ]
