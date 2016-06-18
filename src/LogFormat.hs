@@ -12,7 +12,7 @@ import Network.Wai (Request, httpVersion, requestHeaders, requestMethod,
 import System.Log.FastLogger (LogStr, toLogStr)
 import qualified Data.ByteString.Char8 as BS
 
--- Sligthly modified Common Log Format.
+-- Sligthly modified Combined Log Format.
 -- User ID extracted from the From header.
 logFormat :: BS.ByteString -> Request -> Status -> Maybe Integer -> LogStr
 logFormat t req st msize = ""
