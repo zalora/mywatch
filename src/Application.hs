@@ -48,7 +48,6 @@ myProcess ps logger dataDir = do
 
   middleware $ staticPolicy (hasPrefix "static" >-> addBase dataDir)
   get "/" $ file index_html
-  get "/index.html" $ file index_html
 
   get "/serverlist.json" $ json (sort $ HM.keys ps)
   get "/server/:server/processlist.json" $ apiGetProcessList ps
