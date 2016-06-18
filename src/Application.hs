@@ -41,13 +41,10 @@ app ps f = do
 
 myProcess :: Pools  -> Middleware -> FilePath -> ScottyM ()
 myProcess ps logger dataDir = do
-  let
-    index_html = dataDir ++ "/" ++ "index.html"
-
   middleware logger
 
   middleware $ staticPolicy (hasPrefix "static" >-> addBase dataDir)
-  get "/" $ file index_html
+  get "/" $ file (dataDir ++ "/" ++ "index.html")
 
   get "/serverlist.json" $ json (sort $ HM.keys ps)
   get "/server/:server/processlist.json" $ apiGetProcessList ps
