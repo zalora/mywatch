@@ -35,7 +35,7 @@ $(function() {
             var td = $('<td>');
             td.text(p[c]);
             if ('info' === c) {
-              td.css('white-space', 'pre-wrap');
+              td.addClass('mywatch-query');
             } else if ('time' === c) {
               td.css('text-align', 'right');
             } else if ('id' === c) {

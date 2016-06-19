@@ -1,3 +1,4 @@
 #serverList li { display: inline-block; }
-table#processList td { white-space: nowrap; }
 table th { text-align: center; }
+table#processList td { white-space: nowrap; }
+table#processList td.mywatch-query { white-space: pre-wrap; }
