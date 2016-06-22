@@ -1,3 +1,9 @@
+0.1.2
+=====
+
+  * Use location hash for server name
+  * Compact server list (`display: inline-block`)
+
 0.1.1
 =====
 

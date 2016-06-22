@@ -1,5 +1,5 @@
 name: mywatch
-version: 0.1.1
+version: 0.1.2
 synopsis: View MySQL processes
 description:
   View queries on multiple MySQL servers. Designed to work behind Sproxy.
