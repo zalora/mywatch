@@ -74,6 +74,6 @@ MyWatch needs the `PROCESS` privilege.
 
 Screenshots
 ===========
-![MyWatch](./screenshots/mywatch.png)
-![Access Denied](./screenshots/mywatch500.png)
+![MyWatch1](./screenshots/mywatch-1.png)
+![MyWatch2](./screenshots/mywatch-2.png)
 
