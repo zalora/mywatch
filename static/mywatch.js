@@ -1,9 +1,10 @@
 $(function() {
   var info = $('#info');
-  var infoHead = $('#info>h1');
   var infoAlert = $('#info>div');
+  var infoHead = $('#info>h1');
   var main = $('#main');
   var plBody = $('#processList>tbody');
+  var serverList = $('#serverList>ul');
 
   var interval = null;
 
@@ -21,6 +22,27 @@ $(function() {
     infoAlert.removeClass().addClass('alert alert-danger');
     info.show();
   }
+
+  function switchServer(server) {
+    clearInterval(interval);
+    if ('' !== server) {
+      document.title = server + ' — ' + 'MyWatch';
+      serverList.find('.active').removeClass('active');
+      var s = $('a[href="#' + server + '"]');
+      if (s) {
+        s.parent().addClass('active');
+        getProcessList(server);
+        interval = setInterval(getProcessList, 60 * 1000, server);
+      }
+    } else {
+      document.title = 'MyWatch';
+    }
+  }
+
+  function onHash() {
+    switchServer(location.hash.substring(1));
+  };
+  window.onhashchange = onHash;
 
   function getProcessList(server) {
     $.ajax({
@@ -52,8 +74,8 @@ $(function() {
   };
 
   $.ajax({
-    url: "serverlist.json",
-    method: "GET",
+    url: 'serverlist.json',
+    method: 'GET',
     error: commonError,
     success: function(servers) {
       var total = servers.length;
@@ -61,28 +83,25 @@ $(function() {
       var checked = 0;
       $.each(servers, function(i, s) {
         $.ajax({
-          url: "server/" + s + "/processlist.json",
-          method: "HEAD",
+          url: 'server/' + s + '/processlist.json',
+          method: 'HEAD',
           success: function() {
             available.push(s);
           },
           complete: function() {
-            var menu = $('#serverList>ul');
             checked++;
             if (checked === total) {
               $.each(available.sort(), function(i, s) {
-                menu.append('<li><a href="#">' + s + '</a></li>')
+                serverList.append('<li><a href="#' + s + '">' + s + '</a></li>')
               });
-              $("#serverList a").on("click", function() {
-                var server = $(this).text();
-                document.title = server + ' — ' + 'MyWatch';
-                $(this).parent().parent().find('.active').removeClass('active');
-                $(this).parent().addClass('active');
-                clearInterval(interval);
-                getProcessList(server);
-                interval = setInterval(getProcessList, 60 * 1000, server);
+              serverList.find('a').on('click', function() {
+                var s = $(this).text();
+                if ('#' + s === location.hash) {
+                  getProcessList(s);
+                }
               });
               info.hide();
+              onHash();
             }
           }
         });
