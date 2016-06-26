@@ -1,8 +1,8 @@
 My Watch
 ========
 
-HTTP server for viewing MySQL queries on multiple servers. Designed to work
-behind [Sproxy](https://github.com/zalora/sproxy).
+Web application for viewing and killing MySQL queries on multiple
+servers. Designed to work behind [Sproxy](https://github.com/zalora/sproxy).
 
 
 Requirements
@@ -66,10 +66,21 @@ user = user2
 ```
 
 
-Database Privileges
-===================
+Database Configuration
+======================
 
-MyWatch needs the `PROCESS` privilege.
+MyWatch needs the [PROCESS](http://dev.mysql.com/doc/refman/en/privileges-provided.html#priv_process)
+privilege.
+
+To be able to kill queries a procedure named `mywatch_kill` must exist
+in the `mysql` database.  MyWatch invokes `CALL mysql.mywatch_kill(id)`
+for killing queries.  It's up to you how to implement this routine, for a
+safe example see [sql/mywatch_kill.sql](sql/mywatch_kill.sql). Of cource,
+MyWatch should be granted to execute this procedure.  If this procedure
+does not exist, MyWatch will not show this possibility in user interface,
+API will work, but result in Internal Server Error (HTTP 500). There is no
+filtering at application level, though the "kill" button may not be shown
+in some circumstances.
 
 
 Screenshots

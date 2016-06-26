@@ -4,14 +4,16 @@ $(function() {
   var infoHead = $('#info>h1');
   var main = $('#main');
   var plBody = $('#processList>tbody');
+  var plHeader = $('#processList>thead>tr');
   var serverList = $('#serverList>ul');
 
-  var interval = null;
+  var cankill;
+  var interval;
+  var server;
 
-  var plCols = $('#processList>thead>tr>th')
-    .map(function() {
-      return $(this).text();
-    }).get();
+  var plCols = plHeader.children().map(function() {
+    return $(this).text();
+  }).get();
 
 
   function commonError(jqXHR, textStatus, errorThrown) {
@@ -23,7 +25,8 @@ $(function() {
     info.show();
   }
 
-  function switchServer(server) {
+  function switchServer() {
+    cankill = undefined;
     clearInterval(interval);
     if ('' !== server) {
       document.title = server + ' — ' + 'MyWatch';
@@ -31,8 +34,8 @@ $(function() {
       var s = $('a[href="#' + server + '"]');
       if (s) {
         s.parent().addClass('active');
-        getProcessList(server);
-        interval = setInterval(getProcessList, 60 * 1000, server);
+        getProcessList();
+        interval = setInterval(getProcessList, 60 * 1000);
       }
     } else {
       document.title = 'MyWatch';
@@ -40,37 +43,85 @@ $(function() {
   }
 
   function onHash() {
-    switchServer(location.hash.substring(1));
+    server = location.hash.substring(1);
+    switchServer();
   };
   window.onhashchange = onHash;
 
-  function getProcessList(server) {
+  function kill(id) {
     $.ajax({
-      url: "server/" + server + "/processlist.json",
-      method: "GET",
-      error: commonError,
-      success: function(procs) {
-        plBody.empty();
-        procs.map(function(p) {
-          var tr = $('<tr>');
-          plCols.map(function(c) {
-            var td = $('<td>');
-            td.text(p[c]);
-            if ('info' === c) {
-              td.addClass('mywatch-query');
-            } else if ('time' === c) {
-              td.css('text-align', 'right');
-            } else if ('id' === c) {
-              td.css('text-align', 'right');
-            }
-            tr.append(td);
-          });
-          plBody.append(tr);
+      url: 'server/' + server + '/process/' + id,
+      method: 'DELETE',
+      success: function() {
+        $('#' + id).fadeOut(300, function() {
+          $(this).remove();
         });
-        info.hide();
-        main.show();
       }
     });
+  }
+
+  function showProcessList(procs) {
+    plBody.empty();
+    if (cankill) {
+      if (!plHeader.children('#kill').length) {
+        plHeader.prepend('<th id="kill">');
+      }
+    } else {
+      plHeader.children('#kill').remove();
+    }
+    procs.map(function(p) {
+      var tr = $('<tr id="' + p['id'] + '">');
+      if (cankill) {
+        var td;
+        if (('' != p['host']) && (0 < p['time']) && ('Killed' != p['state'])) {
+          td = $('<td role="button" title="KILL" class="btn btn-danger btn-xs">&nbsp;</td>');
+          td.on('click', function() {
+            kill($(this).parent().attr('id'));
+          });
+        } else {
+          td = $('<td>');
+        }
+        tr.append(td);
+      }
+      plCols.map(function(c) {
+        var td = $('<td>');
+        if ('id' === c) {
+          td.addClass('mywatch-number');
+        } else if ('info' === c) {
+          td.addClass('mywatch-query');
+        } else if ('time' === c) {
+          td.addClass('mywatch-number');
+        }
+        td.text(p[c]);
+        tr.append(td);
+      });
+      plBody.append(tr);
+    });
+    info.hide();
+    main.show();
+  }
+
+  function getProcessList() {
+    function get() {
+      $.ajax({
+        url: 'server/' + server + '/processlist.json',
+        method: 'GET',
+        error: commonError,
+        success: showProcessList
+      });
+    }
+    if (typeof cankill === 'undefined') {
+      $.ajax({
+        url: 'server/' + server + '/process/0',
+        method: 'DELETE',
+        complete: function(jqXHR) {
+          cankill = (200 === jqXHR.status);
+          get();
+        }
+      });
+    } else {
+      get();
+    }
   };
 
   $.ajax({
@@ -95,9 +146,8 @@ $(function() {
                 serverList.append('<li><a href="#' + s + '">' + s + '</a></li>')
               });
               serverList.find('a').on('click', function() {
-                var s = $(this).text();
-                if ('#' + s === location.hash) {
-                  getProcessList(s);
+                if ($(this).text() === server) {
+                  getProcessList();
                 }
               });
               info.hide();

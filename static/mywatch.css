@@ -1,4 +1,7 @@
 #serverList li { display: inline-block; }
+table td.btn { opacity:0; max-width:1em; }
 table th { text-align: center; }
+table tr:hover td.btn { opacity:1; }
 table#processList td { white-space: nowrap; }
+table#processList td.mywatch-number { text-align: right; }
 table#processList td.mywatch-query { white-space: pre-wrap; }

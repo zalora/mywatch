@@ -16,9 +16,9 @@ import Data.Default.Class (def)
 import Data.List (sort)
 import Data.Pool (Pool, withResource)
 import Data.Text.Lazy (Text)
-import Database.MySQL.Simple (Connection, query_)
+import Database.MySQL.Simple (Connection, Only(..), query_, execute)
 import GHC.Generics (Generic)
-import Network.HTTP.Types (ok200, notFound404, StdMethod(HEAD))
+import Network.HTTP.Types (ok200, notFound404, notImplemented501, StdMethod(HEAD))
 import Network.Wai (Application, Middleware)
 import Network.Wai.Middleware.RequestLogger (Destination(Handle),
   mkRequestLogger, RequestLoggerSettings(destination, outputFormat),
@@ -26,7 +26,7 @@ import Network.Wai.Middleware.RequestLogger (Destination(Handle),
 import Network.Wai.Middleware.Static (addBase, hasPrefix, staticPolicy, (>->))
 import System.IO (stderr)
 import Web.Scotty (ScottyM, ActionM, middleware, json, file, addroute, get,
-  status, text, param, scottyApp)
+  delete, status, text, param, scottyApp)
 import qualified Data.HashMap.Lazy as HM
 
 import LogFormat (logFormat)
@@ -52,6 +52,8 @@ myProcess ps logger dataDir = do
   -- Used by client to see which servers are really allowed by Sproxy
   addroute HEAD "/server/:server/processlist.json" $ apiCanProcessList ps
 
+  delete "/server/:server/process/:id" $ apiKill ps
+
 data Process = Process {
     id      :: Int
   , user    :: Text
@@ -70,6 +72,24 @@ apiCanProcessList ps = do
   case HM.lookup server ps of
     Nothing -> status notFound404 >> text server
     Just _  -> status ok200
+
+apiKill :: Pools -> ActionM ()
+apiKill ps = do
+  server <- param "server"
+  case HM.lookup server ps of
+    Nothing -> status notFound404 >> text server
+    Just p  -> do
+      id <- param "id"
+      if (id :: Int) == 0 then do
+        [ Only f ] <- withDB p $ \c ->
+                query_ c "SELECT COUNT(*) FROM information_schema.routines \
+                \WHERE routine_type = 'PROCEDURE' AND routine_schema = 'mysql' \
+                \AND routine_name = 'mywatch_kill'"
+        if (f::Int) > 0 then status ok200
+        else status notImplemented501 >> text "mywatch_kill"
+      else do
+        _ <- withDB p $ \c -> execute c "CALL mysql.mywatch_kill(?)" [ id ]
+        status ok200
 
 apiGetProcessList :: Pools -> ActionM ()
 apiGetProcessList ps = do

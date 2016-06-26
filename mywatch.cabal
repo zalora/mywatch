@@ -1,8 +1,9 @@
 name: mywatch
 version: 0.1.2
-synopsis: View MySQL processes
+synopsis: Web application to view and kill MySQL queries
 description:
-  View queries on multiple MySQL servers. Designed to work behind Sproxy.
+  View and kill queries on multiple MySQL servers.
+  Designed to work behind Sproxy.
 license: MIT
 license-file: LICENSE
 author: Igor Pashev <pashev.igor@gmail.com>
@@ -19,6 +20,9 @@ data-files:
   static/external/jquery-2.2.4.min.js
   static/mywatch.css
   static/mywatch.js
+
+extra-source-files:
+  sql/*.sql
 
 source-repository head
   type: git
