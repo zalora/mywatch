@@ -1,8 +1,19 @@
+0.2.0
+=====
+
+  * Allow killing queries via `CALL mysql.mywatch_kill(id)`. You should have
+    this routine on your database server and grant MyWatch privilege to
+    execute it. Provided a safe example of this function.
+
+  * Minor improvements in UI
+
+
 0.1.2
 =====
 
   * Use location hash for server name
   * Compact server list (`display: inline-block`)
+
 
 0.1.1
 =====
@@ -19,7 +30,8 @@
     processes SSL options. SSL now works with MariaDB's
     libmysqlclient.
 
-  * Fixed parsing of `GRANT` queries (they have `NULL` states).
+  * Fixed parsing of `GRANT` queries (they have `NULL` states)
+
 
 0.1.0
 =====

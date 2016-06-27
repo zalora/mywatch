@@ -1,5 +1,5 @@
 name: mywatch
-version: 0.1.2
+version: 0.2.0
 synopsis: Web application to view and kill MySQL queries
 description:
   View and kill queries on multiple MySQL servers.
