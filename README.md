@@ -65,6 +65,14 @@ user = user2
 !include /run/keys/my.secret.cnf
 ```
 
+Sproxy Configuration
+====================
+
+* To access the service allow `GET` for `/`, `/static/%` and `/severlist.json`.
+* To see processes on a particular MySQL server allow `GET` and `HEAD` for
+  `/server/:server/processlist.json`.
+* To kill processes allow `DELETE` for `/server/:server/process/%`
+
 
 Database Configuration
 ======================
