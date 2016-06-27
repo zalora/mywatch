@@ -68,7 +68,7 @@ user = user2
 Sproxy Configuration
 ====================
 
-* To access the service allow `GET` for `/`, `/static/%` and `/severlist.json`.
+* To access the service allow `GET` for `/`, `/static/%` and `/serverlist.json`.
 * To see processes on a particular MySQL server allow `GET` and `HEAD` for
   `/server/:server/processlist.json`.
 * To kill processes allow `DELETE` for `/server/:server/process/%`
