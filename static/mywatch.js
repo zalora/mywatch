@@ -19,7 +19,7 @@ $(function() {
   function commonError(jqXHR, textStatus, errorThrown) {
     plBody.empty();
     main.hide();
-    infoHead.text('An error has occured');
+    infoHead.text('An error has occurred');
     infoAlert.text((0 == jqXHR.readyState) ? 'Service unavailable' : errorThrown);
     infoAlert.removeClass().addClass('alert alert-danger');
     info.show();
