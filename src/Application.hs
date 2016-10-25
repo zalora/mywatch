@@ -28,6 +28,7 @@ import System.IO (stderr)
 import Web.Scotty (ScottyM, ActionM, middleware, json, file, addroute, get,
   delete, status, text, param, scottyApp)
 import qualified Data.HashMap.Lazy as HM
+import qualified Network.Wai.Middleware.Gzip as Gzip
 
 import LogFormat (logFormat)
 
@@ -42,6 +43,8 @@ app ps f = do
 myProcess :: Pools  -> Middleware -> FilePath -> ScottyM ()
 myProcess ps logger dataDir = do
   middleware logger
+
+  middleware $ Gzip.gzip Gzip.def {Gzip.gzipFiles = Gzip.GzipCompress}
 
   middleware $ staticPolicy (hasPrefix "static" >-> addBase dataDir)
   get "/" $ file (dataDir ++ "/" ++ "index.html")
