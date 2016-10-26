@@ -1,3 +1,9 @@
+0.2.1
+=====
+
+  * Compress all responses with gzip if acceptable
+
+
 0.2.0
 =====
 
